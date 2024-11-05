@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KPI Tracker</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>KPI Tracker</h1>
+
+  <% if (error) { %>
+    <div class="error-message"><%= error %></div>
+  <% } %>
+
+  <form action="/add-kpi" method="POST">
+    <label>User Name:</label>
+    <input type="text" name="user" required>
+
+    <label>Date:</label>
+    <input type="date" name="date" required>
+
+    <label>Number of Calls:</label>
+    <input type="number" name="calls" min="0" required>
+
+    <label>Number of Emails Acquired:</label>
+    <input type="number" name="emails" min="0" required>
+
+    <label>Number of Appointments:</label>
+    <input type="number" name="appointments" min="0" required>
+
+    <label>Estimated Number of Acquisitions:</label>
+    <input type="number" name="acquisitions" min="0" required>
+
+    <label>Number of Contracts Acquired:</label>
+    <input type="number" name="contracts" min="0" required>
+
+    <button type="submit">Add KPI</button>
+  </form>
+
+  <h2>KPI Records</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Date</th>
+        <th>Calls</th>
+        <th>Emails</th>
+        <th>Appointments</th>
+        <th>Acquisitions</th>
+        <th>Contracts</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% records.forEach(record => { %>
+        <tr>
+          <td><%= record.user %></td>
+          <td><%= record.date %></td>
+          <td><%= record.calls %></td>
+          <td><%= record.emails %></td>
+          <td><%= record.appointments %></td>
+          <td><%= record.acquisitions %></td>
+          <td><%= record.contracts %></td>
+          <td>
+            <form action="/delete-kpi/<%= record.id %>" method="POST">
+              <button type="submit" class="delete-button">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>
