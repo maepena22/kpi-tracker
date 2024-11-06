@@ -23,7 +23,7 @@ app.post('/add-kpi', async (req, res) => {
   try {
     const existingRecord = await db.getRecordByUserAndDate(user, date);
     if (existingRecord) {
-      return res.redirect('/?error=KPI record for this user on this date already exists.');
+      return res.redirect('/?error=このユーザーの同じ日付のKPIレコードは既に存在します。');
     }
     await db.addRecord(user, date, calls, emails, appointments, acquisitions, contracts);
     res.redirect('/');

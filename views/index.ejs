@@ -1,55 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KPI Tracker</title>
+  <title>KPI トラッカー</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <h1>KPI Tracker</h1>
+  <h1>KPI トラッカー</h1>
 
   <% if (error) { %>
     <div class="error-message"><%= error %></div>
   <% } %>
 
   <form action="/add-kpi" method="POST">
-    <label>User Name:</label>
+    <label>ユーザー名:</label>
     <input type="text" name="user" required>
 
-    <label>Date:</label>
+    <label>日付:</label>
     <input type="date" name="date" required>
 
-    <label>Number of Calls:</label>
+    <label>コール数:</label>
     <input type="number" name="calls" min="0" required>
 
-    <label>Number of Emails Acquired:</label>
+    <label>取得したメールアドレス数:</label>
     <input type="number" name="emails" min="0" required>
 
-    <label>Number of Appointments:</label>
+    <label>取得したアポイントメント数:</label>
     <input type="number" name="appointments" min="0" required>
 
-    <label>Estimated Number of Acquisitions:</label>
+    <label>推定の獲得数:</label>
     <input type="number" name="acquisitions" min="0" required>
 
-    <label>Number of Contracts Acquired:</label>
+    <label>取得した契約数:</label>
     <input type="number" name="contracts" min="0" required>
 
-    <button type="submit">Add KPI</button>
+    <button type="submit">KPI を追加</button>
   </form>
 
-  <h2>KPI Records</h2>
+  <h2>KPI レコード</h2>
   <table>
     <thead>
       <tr>
-        <th>User</th>
-        <th>Date</th>
-        <th>Calls</th>
-        <th>Emails</th>
-        <th>Appointments</th>
-        <th>Acquisitions</th>
-        <th>Contracts</th>
-        <th>Action</th>
+        <th>ユーザー</th>
+        <th>日付</th>
+        <th>コール数</th>
+        <th>メール数</th>
+        <th>アポイントメント数</th>
+        <th>推定獲得数</th>
+        <th>契約数</th>
+        <th>アクション</th>
       </tr>
     </thead>
     <tbody>
@@ -64,7 +64,7 @@
           <td><%= record.contracts %></td>
           <td>
             <form action="/delete-kpi/<%= record.id %>" method="POST">
-              <button type="submit" class="delete-button">Delete</button>
+              <button type="submit" class="delete-button">削除</button>
             </form>
           </td>
         </tr>
