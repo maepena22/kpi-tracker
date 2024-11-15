@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>月次分析</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f9;
+    }
+    h1 { text-align: center; }
+    .analytics { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+    .user-analytics {
+      width: 45%;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: white;
+      padding: 15px;
+      margin: 10px;
+    }
+    .user-analytics h2 {
+      text-align: center;
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+    .form-container {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .form-container label {
+      font-size: 1.2em;
+    }
+    input[type="month"], button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      margin: 10px 0;
+    }
+    canvas { max-width: 100%; height: 300px; }
+    .form-container { text-align: center; margin-bottom: 30px; }
+    table { width: 80%; margin: 20px auto; border-collapse: collapse; }
+    table, th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    th { background-color: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <header style="background-color: #2c3e50; padding: 15px 20px; text-align: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    <nav>
+      <ul style="list-style-type: none; padding: 0; margin: 0; text-align: center;">
+        <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+          <a href="/" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">KPI追跡</a>
+        </li>
+        <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+          <a href="/analytics-daily" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">日次分析</a>
+        </li>
+        <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+          <a href="/analytics-monthly" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">月次分析</a>
+        </li>
+        <li style="display: inline; margin-bottom: 5px;">
+          <a href="/admin" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">管理者</a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+  
+  <h1>月次KPI分析 - <%= selectedMonth %></h1>
+
+  <div class="form-container">
+    <form action="/analytics-monthly" method="get">
+      <label for="month">月を選択:</label>
+      <input type="month" name="month" value="<%= selectedMonth %>" />
+      <button type="submit">更新</button>
+    </form>
+  </div>
+
+  <div class="analytics">
+    <% users.forEach((user, index) => { 
+        const userRecords = records[index];
+        const totalCalls = userRecords.reduce((sum, record) => sum + record.calls, 0);
+        const totalEmails = userRecords.reduce((sum, record) => sum + record.emails, 0);
+        const totalAppointments = userRecords.reduce((sum, record) => sum + record.appointments, 0);
+        const totalQuotations = userRecords.reduce((sum, record) => sum + record.quotation, 0);
+        const totalContracts = userRecords.reduce((sum, record) => sum + record.contracts, 0);
+
+        const startDate = new Date(selectedMonth + "-01");
+        const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+        let weekdays = 0;
+        for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
+          if (d.getDay() !== 0 && d.getDay() !== 6) weekdays++;
+        }
+
+        const monthlyGoals = {
+          calls: kpiGoals.calls * weekdays,
+          emails: kpiGoals.emails * weekdays,
+          appointments: kpiGoals.appointments * weekdays,
+          quotation: kpiGoals.quotation * weekdays,
+          contracts: kpiGoals.contracts * weekdays
+        };
+    %>
+      <div class="user-analytics">
+        <h2><%= user.username %> (ID: <%= user.id %>)</h2>
+        <canvas id="userChart-<%= user.id %>"></canvas>
+      </div>
+
+      <script>
+        const ctx<%= user.id %> = document.getElementById('userChart-<%= user.id %>').getContext('2d');
+        new Chart(ctx<%= user.id %>, {
+          type: 'bar',
+          data: {
+            labels: ['電話', 'メール', 'アポイント', '見積書', '契約'],
+            datasets: [
+              {
+                label: '実績',
+                data: [<%= totalCalls %>, <%= totalEmails %>, <%= totalAppointments %>, <%= totalQuotations %>, <%= totalContracts %>],
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+              },
+              {
+                label: '月次目標',
+                data: [<%= monthlyGoals.calls %>, <%= monthlyGoals.emails %>, <%= monthlyGoals.appointments %>, <%= monthlyGoals.quotation %>, <%= monthlyGoals.contracts %>],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+      </script>
+    <% }) %>
+
+  <div style="width: 80%; margin: 30px auto; background-color: white; height: 400px; justify-items: center;">
+    <canvas id="radarChart"></canvas>
+  </div>
+
+  <script>
+    const ctxRadar = document.getElementById('radarChart').getContext('2d');
+    const labels = ['電話', 'メール', 'アポイント', '見積書', '契約'];
+    const datasets = [];
+    
+    <% users.forEach((user, index) => { 
+        const userRecords = records[index];
+        const totalCalls = userRecords.reduce((sum, record) => sum + record.calls, 0);
+        const totalEmails = userRecords.reduce((sum, record) => sum + record.emails, 0);
+        const totalAppointments = userRecords.reduce((sum, record) => sum + record.appointments, 0);
+        const totalQuotations = userRecords.reduce((sum, record) => sum + record.quotation, 0);
+        const totalContracts = userRecords.reduce((sum, record) => sum + record.contracts, 0);
+
+        const startDate = new Date(selectedMonth + "-01");
+        const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+        let weekdays = 0;
+        for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
+          if (d.getDay() !== 0 && d.getDay() !== 6) weekdays++;
+        }
+
+        const monthlyGoals = {
+          calls: kpiGoals.calls * weekdays,
+          emails: kpiGoals.emails * weekdays,
+          appointments: kpiGoals.appointments * weekdays,
+          quotation: kpiGoals.quotation * weekdays,
+          contracts: kpiGoals.contracts * weekdays
+        };
+    %>
+      datasets.push({
+        label: '<%= user.username %>',
+        data: [<%= totalCalls %>, <%= totalEmails %>, <%= totalAppointments %>, <%= totalQuotations %>, <%= totalContracts %>],
+        backgroundColor: 'rgba(<%= Math.floor(Math.random() * 255) %>, <%= Math.floor(Math.random() * 255) %>, <%= Math.floor(Math.random() * 255) %>, 0.2)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      });
+    <% }) %>
+
+    new Chart(ctxRadar, {
+      type: 'radar',
+      data: {
+        labels: labels,
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        scales: {
+          r: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  </script>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ユーザー</th>
+        <th>電話</th>
+        <th>メール</th>
+        <th>アポイント</th>
+        <th>見積書</th>
+        <th>契約</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach((user, index) => { 
+        const userRecords = records[index];
+        const totalCalls = userRecords.reduce((sum, record) => sum + record.calls, 0);
+        const totalEmails = userRecords.reduce((sum, record) => sum + record.emails, 0);
+        const totalAppointments = userRecords.reduce((sum, record) => sum + record.appointments, 0);
+        const totalQuotations = userRecords.reduce((sum, record) => sum + record.quotation, 0);
+        const totalContracts = userRecords.reduce((sum, record) => sum + record.contracts, 0);
+      %>
+      <tr>
+        <td><%= user.username %></td>
+        <td><%= totalCalls %></td>
+        <td><%= totalEmails %></td>
+        <td><%= totalAppointments %></td>
+        <td><%= totalQuotations %></td>
+        <td><%= totalContracts %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>

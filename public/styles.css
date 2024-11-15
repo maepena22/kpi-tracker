@@ -5,6 +5,14 @@
   }
   
   /* Body and Heading Styles */
+  select {
+    width: 100%; /* Makes the dropdown fill its container */
+    padding: 8px; /* Adds space inside the dropdown */
+    font-size: 16px; /* Adjusts the font size to make text more readable */
+    border: 1px solid #ccc; /* Adds a border to the dropdown */
+    border-radius: 4px; /* Rounds the corners of the dropdown */
+  }
+  
   body {
     font-family: Arial, sans-serif;
     padding: 20px;

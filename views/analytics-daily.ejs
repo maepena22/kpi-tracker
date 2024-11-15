@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>分析</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Original styles preserved */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f9;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    input, button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      margin: 10px 0;
+    }
+    
+    .analytics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .user-analytics {
+      width: 45%;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: white;
+      padding: 15px;
+      margin: 10px;
+    }
+
+    .user-analytics h2 {
+      text-align: center;
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+
+    canvas {
+      max-width: 100%;
+      width: 200%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .form-container {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-container label {
+      font-size: 1.2em;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 400px;
+      width: 80%;
+      margin: 0 auto;
+      background-color: white;
+    }
+
+    p {
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .comparison-container {
+      width: 100%;
+      margin-top: 50px;
+      text-align: center;
+    }
+
+    table {
+      width: 80%;
+      margin: 30px auto;
+      border-collapse: collapse;
+    }
+
+    table, th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    .table-header {
+      text-align: center;
+      font-size: 1.2em;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <header style="background-color: #2c3e50; padding: 15px 20px; text-align: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    <nav>
+      <ul style="list-style-type: none; padding: 0; margin: 0; text-align: center;">
+        <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+          <a href="/" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">KPI追跡</a>
+        </li>
+        <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+          <a href="/analytics-daily" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">日次分析</a>
+        </li>
+        <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+          <a href="/analytics-monthly" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">月次分析</a>
+        </li>
+        <li style="display: inline; margin-bottom: 5px;">
+          <a href="/admin" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">管理者</a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <h1>KPI記録の分析 - <%= selectedDay %></h1>
+
+  <!-- Day Selection Form -->
+  <div class="form-container">
+    <form action="/analytics-daily" method="get">
+      <label for="day">日付を選択:</label>
+      <input type="date" name="day" value="<%= selectedDay %>" />
+      <button type="submit">更新</button>
+    </form>
+  </div>
+
+  <div class="analytics">
+    <%= errorMessage ? `<p class="error">${errorMessage}</p>` : '' %>
+    <%= successMessage ? `<p class="success">${successMessage}</p>` : '' %>
+
+    <!-- Display User Data and Graphs -->
+    <% users.forEach((user, index) => { 
+        const userRecords = records[index].filter(record => {
+            const recordDate = new Date(record.date);
+            const selectedDate = new Date(selectedDay);
+            return recordDate.toISOString().slice(0, 10) === selectedDate.toISOString().slice(0, 10);
+        });
+    
+        const totalCalls = userRecords.reduce((sum, record) => sum + record.calls, 0);
+        const totalEmails = userRecords.reduce((sum, record) => sum + record.emails, 0);
+        const totalAppointments = userRecords.reduce((sum, record) => sum + record.appointments, 0);
+        const totalAcquisitions = userRecords.reduce((sum, record) => sum + record.quotation, 0);
+        const totalContracts = userRecords.reduce((sum, record) => sum + record.contracts, 0);
+    %>
+        <div class="user-analytics">
+            <h2><%= user.username %> (ID: <%= user.id %>)</h2>
+            <div class="chart-container">
+                <canvas id="userChart-<%= user.id %>"></canvas>
+            </div>
+        </div>
+    <% }) %>
+    
+    <script>
+      <% users.forEach((user, index) => { 
+        const userRecords = records[index].filter(record => {
+            const recordDate = new Date(record.date);
+            const selectedDate = new Date(selectedDay);
+            return recordDate.toISOString().slice(0, 10) === selectedDate.toISOString().slice(0, 10);
+        });
+    
+        const totalCalls = userRecords.reduce((sum, record) => sum + record.calls, 0);
+        const totalEmails = userRecords.reduce((sum, record) => sum + record.emails, 0);
+        const totalAppointments = userRecords.reduce((sum, record) => sum + record.appointments, 0);
+        const totalAcquisitions = userRecords.reduce((sum, record) => sum + record.quotation, 0);
+        const totalContracts = userRecords.reduce((sum, record) => sum + record.contracts, 0);
+      %>
+    
+      const ctx<%= user.id %> = document.getElementById('userChart-<%= user.id %>').getContext('2d');
+    
+      new Chart(ctx<%= user.id %>, {
+        type: 'bar',
+        data: {
+          labels: ['電話', 'メール', 'アポイント', '見積', '契約'],
+          datasets: [{
+            label: '<%= user.username %> のKPI',
+            data: [
+              <%= totalCalls %>, 
+              <%= totalEmails %>, 
+              <%= totalAppointments %>, 
+              <%= totalAcquisitions %>, 
+              <%= totalContracts %>
+            ],
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+          }, {
+            label: 'KPI目標',
+            data: [
+              <%= kpiGoals.calls %>, 
+              <%= kpiGoals.emails %>, 
+              <%= kpiGoals.appointments %>, 
+              <%= kpiGoals.quotation %>, 
+              <%= kpiGoals.contracts %>
+            ],
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      <% }) %>
+    </script>
+  </div>
+
+  <!-- Comparison Graph -->
+  <div class="comparison-container">
+    <h2>社員全体の比較</h2>
+    <div class="chart-container">
+      <canvas id="comparisonChart"></canvas>
+    </div>
+
+    <script>
+      const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+      const comparisonChart = new Chart(comparisonCtx, {
+        type: 'radar',
+        data: {
+          labels: ['電話', 'メール', 'アポイント', '見積', '契約'],
+          datasets: [
+            <% users.forEach((user, index) => { 
+                const userRecords = records[index].filter(record => {
+                  const recordDate = new Date(record.date);
+                  const selectedDate = new Date(selectedDay);
+                  return recordDate.toISOString().slice(0, 10) === selectedDate.toISOString().slice(0, 10);
+                });
+                
+                const totalCalls = userRecords.reduce((sum, record) => sum + record.calls, 0);
+                const totalEmails = userRecords.reduce((sum, record) => sum + record.emails, 0);
+                const totalAppointments = userRecords.reduce((sum, record) => sum + record.appointments, 0);
+                const totalAcquisitions = userRecords.reduce((sum, record) => sum + record.quotation, 0);
+                const totalContracts = userRecords.reduce((sum, record) => sum + record.contracts, 0);
+            %>
+              {
+                label: '<%= user.username %>',
+                data: [
+                  <%= totalCalls %>,
+                  <%= totalEmails %>,
+                  <%= totalAppointments %>,
+                  <%= totalAcquisitions %>,
+                  <%= totalContracts %>
+                ],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+              },
+            <% }) %>
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            r: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    </script>
+  </div>
+
+  <!-- User Totals Table -->
+  <div class="table-header">
+    <h2>ユーザー別総合実績</h2>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>ユーザー</th>
+        <th>電話</th>
+        <th>メール</th>
+        <th>アポイント</th>
+        <th>見積</th>
+        <th>契約</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach((user, index) => { 
+        const userRecords = records[index].filter(record => {
+          const recordDate = new Date(record.date);
+          const selectedDate = new Date(selectedDay);
+          return recordDate.toISOString().slice(0, 10) === selectedDate.toISOString().slice(0, 10);
+        });
+
+        const totalCalls = userRecords.reduce((sum, record) => sum + record.calls, 0);
+        const totalEmails = userRecords.reduce((sum, record) => sum + record.emails, 0);
+        const totalAppointments = userRecords.reduce((sum, record) => sum + record.appointments, 0);
+        const totalAcquisitions = userRecords.reduce((sum, record) => sum + record.quotation, 0);
+        const totalContracts = userRecords.reduce((sum, record) => sum + record.contracts, 0);
+      %>
+        <tr>
+          <td><%= user.username %></td>
+          <td><%= totalCalls %></td>
+          <td><%= totalEmails %></td>
+          <td><%= totalAppointments %></td>
+          <td><%= totalAcquisitions %></td>
+          <td><%= totalContracts %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>
