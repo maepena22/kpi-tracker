@@ -1,5 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database(':memory:');
+// Change ':memory:' to a file-based database
+const db = new sqlite3.Database('./kpi.db');
 
 // Initialize database and create table
 db.serialize(() => {
