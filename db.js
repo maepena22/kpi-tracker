@@ -185,5 +185,31 @@ const getUserKpiRecordsDaily = (userId, day) => {
 };
 
 
+// Update a KPI record by ID
+const updateRecord = (id, user, date, calls, emails, appointments, quotation, contracts) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      UPDATE kpi
+      SET user = ?, date = ?, calls = ?, emails = ?, appointments = ?, quotation = ?, contracts = ?
+      WHERE id = ?
+    `;
+    db.run(query, [user, date, calls, emails, appointments, quotation, contracts, id], function (err) {
+      if (err) reject(err);
+      resolve(this.changes); // Number of rows updated
+    });
+  });
+};
 
-module.exports = { getUserKpiRecordsDaily, getUserKpiRecords, getKpiGoals, getAllRecords, addRecord, getRecordByUserAndDate, deleteRecord, addUser, getAllUsers, deleteUser, updateKpiGoals };
+// Get a KPI record by ID
+const getRecordById = (id) => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT * FROM kpi WHERE id = ?`;
+    db.get(query, [id], (err, row) => {
+      if (err) reject(err);
+      resolve(row);
+    });
+  });
+};
+
+
+module.exports = {getRecordById, updateRecord, getUserKpiRecordsDaily, getUserKpiRecords, getKpiGoals, getAllRecords, addRecord, getRecordByUserAndDate, deleteRecord, addUser, getAllUsers, deleteUser, updateKpiGoals };

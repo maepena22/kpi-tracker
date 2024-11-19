@@ -99,4 +99,7 @@
   .delete-button:hover {
     background-color: #dc2626;
   }
+  .action{
+    width: 25%;
+  }
   

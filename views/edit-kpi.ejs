@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KPI 編集</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .edit-button {
+      color: #fff;
+      background-color: #3498db;
+      padding: 5px 10px;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .delete-button {
+      color: #fff;
+      background-color: #e74c3c;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>KPI 編集</h1>
+  <form action="/edit-kpi/<%= record.id %>" method="POST">
+    <label>ユーザー名:</label>
+    <% 
+    const selectedUser = users.find(user => user.id.toString() === record.user);
+  %>
+  <span><%= selectedUser ? selectedUser.username : 'Unknown User' %></span>
+  <input type="hidden" name="user" value="<%= record.user %>">
+
+    <label>日付:</label>
+    <span><%= record.date %></span>
+    <input type="hidden" name="date" value="<%= record.date %>">
+
+    <label>コール数:</label>
+    <input type="number" name="calls" min="0" value="<%= record.calls %>" required>
+
+    <label>取得したメールアドレス数:</label>
+    <input type="number" name="emails" min="0" value="<%= record.emails %>" required>
+
+    <label>取得したアポイントメント数:</label>
+    <input type="number" name="appointments" min="0" value="<%= record.appointments %>" required>
+
+    <label>見積書の獲得数:</label>
+    <input type="number" name="quotation" min="0" value="<%= record.quotation %>" required>
+
+    <label>取得した契約数:</label>
+    <input type="number" name="contracts" min="0" value="<%= record.contracts %>" required>
+
+    <button type="submit">更新</button>
+  </form>
+</body>
+</html>
