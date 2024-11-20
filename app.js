@@ -1,25 +1,84 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const db = require('./db');
+const session = require('express-session');
 
 const app = express();
 const PORT = 3000;
 
 
+const ADMIN_PASSWORD = 'Apex2020';
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
+
+// Configure session middleware
+app.use(session({
+  secret: 'kpiAppSecretKey', // Replace with a secure random string in production
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 } // 1 week
+}));
+
+
+// Middleware to protect the admin page
+function requireAdmin(req, res, next) {
+  if (req.session.isAdmin) {
+    return next();
+  }
+  res.redirect('/admin-login');
+}
+
+
+// Admin login route
+app.get('/admin-login', (req, res) => {
+  const error = req.query.error || null;
+  res.render('admin-login', { error }); // Create a simple login form in `admin-login.ejs`
+});
+
+app.post('/admin-login', (req, res) => {
+  const { password } = req.body;
+
+  if (password === ADMIN_PASSWORD) {
+    req.session.isAdmin = true;
+    return res.redirect('/admin');
+  }
+
+  res.redirect('/admin-login?error=Invalid password');
+});
+
+app.get('/logout', function (req, res, next) {
+  // logout logic
+
+  // clear the user from the session object and save.
+  // this will ensure that re-using the old session id
+  // does not have a logged in user
+  req.session.user = null
+  req.session.save(function (err) {
+    if (err) next(err)
+
+    // regenerate the session, which is good practice to help
+    // guard against forms of session fixation
+    req.session.regenerate(function (err) {
+      if (err) next(err)
+      res.redirect('/')
+    })
+  })
+})
+
 // Home route: Displays KPI form and table of records, including any error messages
 
 app.get('/', async (req, res) => {
+  const isLoggedIn = req.session?.isAdmin || false;
   const records = await db.getAllRecords();
   const error = req.query.error || null;
   db.getAllUsers()  // Replace with your actual method to fetch users
     .then(users => {
       db.getAllRecords()  // Replace with your actual method to fetch records
         .then(records => {
-          res.render('index', { users: users, records: records });
+          res.render('index', { users: users, records: records, isLoggedIn });
         })
         .catch(err => {
           console.error('Error fetching records:', err);
@@ -57,17 +116,26 @@ app.post('/delete-kpi/:id', async (req, res) => {
 
 
 // Admin page route
-app.get('/admin', async (req, res) => {
-  const users = await db.getAllUsers();
-  const kpiGoals = await db.getKpiGoals(); // Fetch the current KPI goals
+// Admin page route (protected)
+app.get('/admin', requireAdmin, async (req, res) => {
+  try {
+    const users = await db.getAllUsers();
+    const kpiGoals = await db.getKpiGoals(); // Fetch the current KPI goals
+    const isLoggedIn = req.session?.isAdmin || false;
 
-  res.render('admin', {
-    users,
-    kpiGoals, // This will contain the current KPI goals
-    successMessage: req.query.success || null,
-    errorMessage: req.query.error || null
-  });
+    res.render('admin', {
+      isLoggedIn,
+      users,
+      kpiGoals,
+      successMessage: req.query.success || null,
+      errorMessage: req.query.error || null
+    });
+  } catch (err) {
+    console.error('Error loading admin page:', err);
+    res.render('admin', { errorMessage: 'Failed to load admin data.' });
+  }
 });
+
 // Route to add a new user
 app.post('/admin/add-user', async (req, res) => {
   const { user } = req.body;
@@ -105,6 +173,7 @@ app.post('/admin/update-goals', async (req, res) => {
 
 
 app.get('/analytics-daily', async (req, res) => {
+  const isLoggedIn = req.session?.isAdmin || false;
   const selectedDay = req.query.day || new Date().toISOString().slice(0, 10); // Default to today's date (YYYY-MM-DD)
   try {
     // Fetch users, kpi goals, and records for the selected day
@@ -117,6 +186,7 @@ app.get('/analytics-daily', async (req, res) => {
     // Render the page and pass selectedDay along with other data
 
     res.render('analytics-daily', {
+      isLoggedIn,
       users,
       records,
       kpiGoals,
@@ -133,6 +203,7 @@ app.get('/analytics-daily', async (req, res) => {
 
 
 app.get('/analytics-monthly', async (req, res) => {
+  const isLoggedIn = req.session?.isAdmin || false;
   const selectedMonth = req.query.month || new Date().toISOString().slice(0, 7);  // Default to the current month (YYYY-MM)
   
   try {
@@ -146,6 +217,7 @@ app.get('/analytics-monthly', async (req, res) => {
     );
     
     res.render('analytics-monthly', {
+      isLoggedIn,
       users,
       records,
       kpiGoals,

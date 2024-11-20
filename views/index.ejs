@@ -1,15 +1,15 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>KPI トラッカー</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-  <header class="max-w-4xl" style="background-color: #2c3e50; padding: 15px 20px; text-align: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-    <nav>
+  <!DOCTYPE html>
+  <html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>KPI トラッカー</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="max-w-4xl" style="background-color: #2c3e50; padding: 15px 20px; text-align: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+      <nav>
         <ul style="list-style-type: none; padding: 0; margin: 0; text-align: center;">
           <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
             <a href="/" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">KPI追跡</a>
@@ -18,102 +18,123 @@
             <a href="/analytics-daily" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">日次分析</a>
           </li>
           <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
-              <a href="/analytics-monthly" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">月次分析</a>
-            </li>
-          <li style="display: inline; margin-bottom: 5px;">
+            <a href="/analytics-monthly" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">月次分析</a>
+          </li>
+          <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
             <a href="/admin" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">管理者</a>
           </li>
+          
+          <% if (isLoggedIn) { %>
+            <!-- Show Logout button if user is logged in -->
+            <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+              <a href="/logout" style="text-decoration: none; color: #2c3e50; background-color: #ecf0f1; font-size: 18px; font-weight: bold; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s ease, color 0.3s ease;">
+                ログアウト
+              </a>
+            </li>
+          <% } else { %>
+            <!-- Show Login button if user is not logged in -->
+            <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+              <a href="/admin-login" style="text-decoration: none; color: #2c3e50; background-color: #ecf0f1; font-size: 18px; font-weight: bold; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s ease, color 0.3s ease;">
+                ログイン
+              </a>
+            </li>
+          <% } %>
+          
         </ul>
       </nav>
-  </header>
+    </header>
+        
 
-  <h1>KPI トラッカー</h1>
+    <h1>KPI トラッカー</h1>
 
 
-  <form action="/add-kpi" method="POST">
-    <label>ユーザー名:</label>
-    <select name="user" required>
-      <option value="" disabled selected>ユーザーを選択してください</option>
-      <% users.forEach(user => { %>
-        <option value="<%= user.id %>"><%= user.username %></option>
-      <% }) %>
-    </select>
+    <form action="/add-kpi" method="POST">
+      <label>ユーザー名:</label>
+      <select name="user" required>
+        <option value="" disabled selected>ユーザーを選択してください</option>
+        <% users.forEach(user => { %>
+          <option value="<%= user.id %>"><%= user.username %></option>
+        <% }) %>
+      </select>
 
-    <label>日付:</label>
-    <input type="date" name="date" required>
+      <label>日付:</label>
+      <input type="date" name="date" required>
 
-    <label>コール数:</label>
-    <input type="number" name="calls" min="0" required>
+      <label>コール数:</label>
+      <input type="number" name="calls" min="0" required>
 
-    <label>取得したメールアドレス数:</label>
-    <input type="number" name="emails" min="0" required>
+      <label>取得したメールアドレス数:</label>
+      <input type="number" name="emails" min="0" required>
 
-    <label>取得したアポイントメント数:</label>
-    <input type="number" name="appointments" min="0" required>
+      <label>取得したアポイントメント数:</label>
+      <input type="number" name="appointments" min="0" required>
 
-    <label>見積書の獲得数:</label>
-    <input type="number" name="quotation" min="0" required>
+      <label>見積書の獲得数:</label>
+      <input type="number" name="quotation" min="0" required>
 
-    <label>取得した契約数:</label>
-    <input type="number" name="contracts" min="0" required>
+      <label>取得した契約数:</label>
+      <input type="number" name="contracts" min="0" required>
 
-    <button type="submit">KPI を追加</button>
-  </form>
+      <button type="submit">KPI を追加</button>
+    </form>
 
-  <h2>KPI レコード</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>ユーザー</th>
-        <th>日付</th>
-        <th>コール数</th>
-        <th>メール数</th>
-        <th>アポイントメント数</th>
-        <th>推定獲得数</th>
-        <th>契約数</th>
-        <th>アクション</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% records.forEach(record => { %>
+    <h2>KPI レコード</h2>
+    <table>
+      <thead>
         <tr>
-          <td><%= record.username %></td>
-          <td><%= record.date %></td>
-          <td><%= record.calls %></td>
-          <td><%= record.emails %></td>
-          <td><%= record.appointments %></td>
-          <td><%= record.quotation %></td>
-          <td><%= record.contracts %></td>
-          <td class="action">
-            <form action="/delete-kpi/<%= record.id %>" method="POST" style="display: inline-block; margin-right: 10px;">
-              <button type="submit" class="delete-button" style="
-                background-color: #e74c3c;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                padding: 5px 10px;
-                cursor: pointer;
-                font-size: 14px;
-              ">
-                削除
-              </button>
-            </form>
-            <a href="/edit-kpi/<%= record.id %>" class="edit-button" style="
-              background-color: #3498db;
-              color: white;
-              text-decoration: none;
-              padding: 5px 10px;
-              border-radius: 5px;
-              font-size: 14px;
-              cursor: pointer;
-            ">
-              編集
-            </a>
-          </td>
-          
+          <th>ユーザー</th>
+          <th>日付</th>
+          <th>コール数</th>
+          <th>メール数</th>
+          <th>アポイントメント数</th>
+          <th>推定獲得数</th>
+          <th>契約数</th>
+          <% if (isLoggedIn) { %>
+            <th>アクション</th>
+          <% } %>
         </tr>
-      <% }) %>
-    </tbody>
-  </table>
-</body>
-</html>
+      </thead>
+      <tbody>
+        <% records.forEach(record => { %>
+          <tr>
+            <td><%= record.username %></td>
+            <td><%= record.date %></td>
+            <td><%= record.calls %></td>
+            <td><%= record.emails %></td>
+            <td><%= record.appointments %></td>
+            <td><%= record.quotation %></td>
+            <td><%= record.contracts %></td>
+            <% if (isLoggedIn) { %>
+              <td class="action">
+                <form action="/delete-kpi/<%= record.id %>" method="POST" style="display: inline-block; margin-right: 10px;">
+                  <button type="submit" class="delete-button" style="
+                    background-color: #e74c3c;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    padding: 5px 10px;
+                    cursor: pointer;
+                    font-size: 14px;
+                  ">
+                    削除
+                  </button>
+                </form>
+                <a href="/edit-kpi/<%= record.id %>" class="edit-button" style="
+                  background-color: #3498db;
+                  color: white;
+                  text-decoration: none;
+                  padding: 5px 10px;
+                  border-radius: 5px;
+                  font-size: 14px;
+                  cursor: pointer;
+                ">
+                  編集
+                </a>
+              </td>
+            <% } %>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </body>
+  </html>

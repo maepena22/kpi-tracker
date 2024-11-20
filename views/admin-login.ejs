@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f9f9f9; /* Off-white background */
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      text-align: center;
+      padding: 3rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+      background-color: white;
+      width: 90%;
+      max-width: 400px;
+      position: relative; /* For positioning the back arrow */
+    }
+    .back-arrow {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      text-decoration: none;
+      font-size: 1.5rem;
+      color: #EF4444; /* Red-500 for the back arrow */
+      font-weight: bold;
+    }
+    h1 {
+      color: #EF4444; /* Red-500 for heading */
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 1rem;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+    input[type="password"] {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #EF4444; /* Red-500 button */
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #dc2626; /* Darker shade for hover */
+    }
+    .error {
+      color: #EF4444; /* Red-500 error message */
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 2rem 1.5rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      input[type="password"], button {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back-arrow">&larr; Home</a>
+    <h1>Admin Login</h1>
+    <% if (error) { %>
+      <p class="error"><%= error %></p>
+    <% } %>
+    <form method="POST" action="/admin-login">
+      <label for="password">Password:</label>
+      <input type="password" name="password" id="password" placeholder="Enter your password" required>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+</body>
+</html>
