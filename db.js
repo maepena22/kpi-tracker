@@ -12,8 +12,7 @@ db.serialize(() => {
       emails INTEGER NOT NULL,
       appointments INTEGER NOT NULL,
       quotation INTEGER NOT NULL,
-      contracts INTEGER NOT NULL,
-      UNIQUE(user, date)
+      contracts INTEGER NOT NULL
     )
   `);
 

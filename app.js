@@ -74,10 +74,11 @@ app.get('/', async (req, res) => {
   const isLoggedIn = req.session?.isAdmin || false;
   const records = await db.getAllRecords();
   const error = req.query.error || null;
-  db.getAllUsers()  // Replace with your actual method to fetch users
+  db.getAllUsers()  
     .then(users => {
-      db.getAllRecords()  // Replace with your actual method to fetch records
+      db.getAllRecords()  
         .then(records => {
+          console.log('Fetched records:', records);
           res.render('index', { users: users, records: records, isLoggedIn });
         })
         .catch(err => {
@@ -96,10 +97,10 @@ app.post('/add-kpi', async (req, res) => {
   const { user, date, calls, emails, appointments, quotation, contracts } = req.body;
 
   try {
-    const existingRecord = await db.getRecordByUserAndDate(user, date);
-    if (existingRecord) {
-      return res.redirect('/?error=このユーザーの同じ日付のKPIレコードは既に存在します。');
-    }
+    // const existingRecord = await db.getRecordByUserAndDate(user, date);
+    // if (existingRecord) {
+    //   return res.redirect('/?error=このユーザーの同じ日付のKPIレコードは既に存在します。');
+    // }
     await db.addRecord(user, date, calls, emails, appointments, quotation, contracts);
     res.redirect('/');
   } catch (err) {
