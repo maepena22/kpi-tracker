@@ -210,5 +210,43 @@ const getRecordById = (id) => {
   });
 };
 
+async function getFilteredRecords(userIds, startDate, endDate) {
+  const userFilter = Array.isArray(userIds) && userIds.length > 0;
 
-module.exports = {getRecordById, updateRecord, getUserKpiRecordsDaily, getUserKpiRecords, getKpiGoals, getAllRecords, addRecord, getRecordByUserAndDate, deleteRecord, addUser, getAllUsers, deleteUser, updateKpiGoals };
+  // Base query with join to include `users.username`
+  let query = `
+    SELECT kpi.*, users.username 
+    FROM kpi 
+    JOIN users ON kpi.user = users.id 
+    WHERE 1=1
+  `;
+  const params = [];
+
+  // Add date filter only if both startDate and endDate are provided
+  if (startDate && endDate) {
+    query += ` AND kpi.date >= ? AND kpi.date <= ?`;
+    params.push(startDate, endDate);
+  }
+
+  // Add user filter only if userIds is provided
+  if (userFilter) {
+    const placeholders = userIds.map(() => '?').join(', ');
+    query += ` AND kpi.user IN (${placeholders})`;
+    params.push(...userIds);
+  }
+
+  // Add ordering by username and date
+  query += ` ORDER BY users.username ASC, kpi.date DESC`;
+
+  return new Promise((resolve, reject) => {
+    db.all(query, params, (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
+}
+
+
+
+
+module.exports = {getFilteredRecords, getRecordById, updateRecord, getUserKpiRecordsDaily, getUserKpiRecords, getKpiGoals, getAllRecords, addRecord, getRecordByUserAndDate, deleteRecord, addUser, getAllUsers, deleteUser, updateKpiGoals };

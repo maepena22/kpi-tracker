@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generate Reports</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9; /* Off-white */
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+
+        align-items: center;
+        height: 100vh;
+      }
+
+      .container {
+        max-width: 800px;
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        width: 100%;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      label {
+        font-weight: bold;
+        color: #444;
+        padding-bottom: 10px;
+      }
+
+      select,
+      input[type="date"],
+      input[type="text"] {
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 100%;
+      }
+
+      select[multiple] {
+        height: auto;
+      }
+
+      button {
+        background-color: #b71c1c; /* Red-500 */
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #8b0000; /* Darker red for hover */
+      }
+
+      .error-message {
+        color: #b71c1c; /* Red-500 */
+        text-align: center;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+
+      .flatpickr-wrapper {
+        position: relative;
+        width: 100%;
+      }
+
+      /* Ensuring Flatpickr does not overflow */
+      .flatpickr-input {
+        width: 100% !important;
+        box-sizing: border-box;
+      }
+
+      header {
+        background-color: #2c3e50;
+        padding: 15px 20px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+      }
+
+      header nav ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        text-align: center;
+      }
+
+      header nav ul li {
+        display: inline;
+        margin-right: 30px;
+        margin-bottom: 5px;
+      }
+
+      header nav ul li a {
+        text-decoration: none;
+        color: #ecf0f1;
+        font-size: 18px;
+        font-weight: bold;
+        transition: color 0.3s ease;
+      }
+
+      header nav ul li a:hover {
+        color: #b71c1c; /* Red-500 */
+      }
+    </style>
+  </head>
+  <body>
+    <header
+      style="
+        background-color: #2c3e50;
+        padding: 15px 20px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+      "
+    >
+      <nav>
+        <ul
+          style="
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+          "
+        >
+          <li style="display: inline; margin-right: 30px; margin-bottom: 5px">
+            <a
+              href="/"
+              style="
+                text-decoration: none;
+                color: #ecf0f1;
+                font-size: 18px;
+                font-weight: bold;
+                transition: color 0.3s ease;
+              "
+              >KPI追跡</a
+            >
+          </li>
+          <li style="display: inline; margin-right: 30px; margin-bottom: 5px">
+            <a
+              href="/analytics-daily"
+              style="
+                text-decoration: none;
+                color: #ecf0f1;
+                font-size: 18px;
+                font-weight: bold;
+                transition: color 0.3s ease;
+              "
+              >日次分析</a
+            >
+          </li>
+          <li style="display: inline; margin-right: 30px; margin-bottom: 5px">
+            <a
+              href="/analytics-monthly"
+              style="
+                text-decoration: none;
+                color: #ecf0f1;
+                font-size: 18px;
+                font-weight: bold;
+                transition: color 0.3s ease;
+              "
+              >月次分析</a
+            >
+          </li>
+          <li style="display: inline; margin-right: 30px; margin-bottom: 5px">
+            <a
+              href="/reports"
+              style="
+                text-decoration: none;
+                color: #ecf0f1;
+                font-size: 18px;
+                font-weight: bold;
+                transition: color 0.3s ease;
+              "
+              >報告書</a
+            >
+          </li>
+          <li style="display: inline; margin-right: 30px; margin-bottom: 5px">
+            <a
+              href="/admin"
+              style="
+                text-decoration: none;
+                color: #ecf0f1;
+                font-size: 18px;
+                font-weight: bold;
+                transition: color 0.3s ease;
+              "
+              >管理者</a
+            >
+          </li>
+
+          <% if (isLoggedIn) { %>
+          <!-- Show Logout button if user is logged in -->
+          <li style="display: inline; margin-right: 30px; margin-bottom: 5px">
+            <a
+              href="/logout"
+              style="
+                text-decoration: none;
+                color: #2c3e50;
+                background-color: #ecf0f1;
+                font-size: 18px;
+                font-weight: bold;
+                padding: 8px 15px;
+                border-radius: 4px;
+                transition: background-color 0.3s ease, color 0.3s ease;
+              "
+            >
+              ログアウト
+            </a>
+          </li>
+          <% } else { %>
+          <!-- Show Login button if user is not logged in -->
+          <li style="display: inline; margin-right: 30px; margin-bottom: 5px">
+            <a
+              href="/admin-login"
+              style="
+                text-decoration: none;
+                color: #2c3e50;
+                background-color: #ecf0f1;
+                font-size: 18px;
+                font-weight: bold;
+                padding: 8px 15px;
+                border-radius: 4px;
+                transition: background-color 0.3s ease, color 0.3s ease;
+              "
+            >
+              ログイン
+            </a>
+          </li>
+          <% } %>
+        </ul>
+      </nav>
+    </header>
+
+    <h1>KPI報告書をダウンロード</h1>
+    <div class="container">
+      <form action="/generate-report" method="POST">
+        <!-- Multi-select User with Select2 -->
+        <div>
+          <label for="users">ユーザー: </label>
+          <select name="users[]" id="users" multiple="multiple">
+            <% users.forEach(user => { %>
+            <option value="<%= user.id %>"><%= user.username %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Date Range Picker -->
+        <div class="flatpickr-wrapper">
+          <label for="date">日付範囲: </label>
+          <input
+            type="text"
+            id="date"
+            name="dateRange"
+            placeholder="日付または範囲を選択してください"
+            readonly
+          />
+        </div>
+
+        <div>
+          <button type="submit">レポートを生成する</button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      // Initialize Select2 for the user select dropdown
+      document.addEventListener("DOMContentLoaded", () => {
+        // Initialize Select2 with search and multi-select functionality
+        $("#users").select2({
+          placeholder: "ユーザーを検索",
+          allowClear: true,
+        });
+
+        // Initialize Flatpickr for the date range picker
+        const dateInput = document.getElementById("date");
+        flatpickr(dateInput, {
+          mode: "range",
+          dateFormat: "Y-m-d",
+          allowInput: true,
+          onClose: (selectedDates, dateStr) => {
+            console.log("Selected dates:", selectedDates);
+          },
+        });
+      });
+    </script>
+
+    <!-- Include jQuery, Select2, and Flatpickr libraries -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  </body>
+</html>

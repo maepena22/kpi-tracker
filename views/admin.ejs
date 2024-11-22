@@ -93,41 +93,44 @@
 
 <body class="bg-gray-100">
 
-    <header class="max-w-4xl" style="background-color: #2c3e50; padding: 15px 20px; text-align: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-        <nav>
-          <ul style="list-style-type: none; padding: 0; margin: 0; text-align: center;">
-            <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
-              <a href="/" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">KPI追跡</a>
-            </li>
-            <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
-              <a href="/analytics-daily" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">日次分析</a>
-            </li>
-            <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
-              <a href="/analytics-monthly" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">月次分析</a>
-            </li>
-            <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
-              <a href="/admin" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">管理者</a>
-            </li>
-            
-            <% if (isLoggedIn) { %>
-              <!-- Show Logout button if user is logged in -->
-              <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
-                <a href="/logout" style="text-decoration: none; color: #2c3e50; background-color: #ecf0f1; font-size: 18px; font-weight: bold; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s ease, color 0.3s ease;">
-                  ログアウト
-                </a>
-              </li>
-            <% } else { %>
-              <!-- Show Login button if user is not logged in -->
-              <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
-                <a href="/admin-login" style="text-decoration: none; color: #2c3e50; background-color: #ecf0f1; font-size: 18px; font-weight: bold; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s ease, color 0.3s ease;">
-                  ログイン
-                </a>
-              </li>
-            <% } %>
-            
-          </ul>
-        </nav>
-      </header>
+  <header class="max-w-4xl" style="background-color: #2c3e50; padding: 15px 20px; text-align: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    <nav>
+      <ul style="list-style-type: none; padding: 0; margin: 0; text-align: center;">
+        <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+          <a href="/" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">KPI追跡</a>
+        </li>
+        <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+          <a href="/analytics-daily" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">日次分析</a>
+        </li>
+        <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+          <a href="/analytics-monthly" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">月次分析</a>
+        </li>
+         <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+          <a href="/reports" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">報告書</a>
+        </li>
+        <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+          <a href="/admin" style="text-decoration: none; color: #ecf0f1; font-size: 18px; font-weight: bold; transition: color 0.3s ease;">管理者</a>
+        </li>
+        
+        <% if (isLoggedIn) { %>
+          <!-- Show Logout button if user is logged in -->
+          <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+            <a href="/logout" style="text-decoration: none; color: #2c3e50; background-color: #ecf0f1; font-size: 18px; font-weight: bold; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s ease, color 0.3s ease;">
+              ログアウト
+            </a>
+          </li>
+        <% } else { %>
+          <!-- Show Login button if user is not logged in -->
+          <li style="display: inline; margin-right: 30px; margin-bottom: 5px;">
+            <a href="/admin-login" style="text-decoration: none; color: #2c3e50; background-color: #ecf0f1; font-size: 18px; font-weight: bold; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s ease, color 0.3s ease;">
+              ログイン
+            </a>
+          </li>
+        <% } %>
+        
+      </ul>
+    </nav>
+  </header>
           
     
   

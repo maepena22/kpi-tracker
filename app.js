@@ -262,6 +262,75 @@ app.post('/edit-kpi/:id', async (req, res) => {
   }
 });
 
+// Report generation UI
+app.get('/reports', async (req, res) => {
+  const isLoggedIn = req.session?.isAdmin || false;
+  try {
+    const users = await db.getAllUsers();
+    res.render('reports', { isLoggedIn, users });
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.render('reports', { errorMessage: 'Failed to load data for reports.' });
+  }
+});
+
+// Generate and download Excel report
+app.post('/generate-report', async (req, res) => {
+  const { users = [], dateRange } = req.body;
+
+  // Process date range input
+  let startDate = null;
+  let endDate = null;
+  if (dateRange) {
+    const dates = dateRange.split(' to '); // Flatpickr returns "startDate to endDate" format for ranges
+    startDate = dates[0];
+    endDate = dates[1] || dates[0]; // If no range, use the same date for both start and end
+  }
+
+  try {
+    // Fetch records from database
+    const records = await db.getFilteredRecords(users, startDate, endDate);
+
+    const ExcelJS = require('exceljs');
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('KPI Report');
+
+    // Add headers
+    sheet.columns = [
+      { header: 'ユーザー名', key: 'username', width: 20 },
+      { header: '日付', key: 'date', width: 15 },
+      { header: 'コール数', key: 'calls', width: 10 },
+      { header: '取得したメールアドレス数', key: 'emails', width: 10 },
+      { header: '取得したアポイントメント数', key: 'appointments', width: 15 },
+      { header: '見積書の獲得数', key: 'quotation', width: 15 },
+      { header: '取得した契約数', key: 'contracts', width: 10 },
+    ];
+
+    // Add data rows
+    records.forEach(record => {
+      sheet.addRow({
+        username: record.username,
+        date: record.date,
+        calls: record.calls,
+        emails: record.emails,
+        appointments: record.appointments,
+        quotation: record.quotation,
+        contracts: record.contracts,
+      });
+    });
+
+    // Stream the Excel file to the client
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="kpi_report.xlsx"');
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error('Error generating report:', err);
+    res.redirect('/reports?error=Failed to generate report.');
+  }
+});
+
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
