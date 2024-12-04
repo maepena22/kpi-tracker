@@ -6,6 +6,14 @@
     
     <title>KPI トラッカー</title>
     <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/path/to/your/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css">
+    <style>
+      .flatpickr-calendar {
+        z-index: 9999; /* Ensure the calendar is on top of other elements */
+      }
+    </style>
   </head>
   <body>
     <header class="max-w-4xl" style="background-color: #2c3e50; padding: 15px 20px; text-align: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
@@ -82,7 +90,24 @@
     </form>
 
     <h2>KPI レコード</h2>
+    <form id="filterForm" method="GET" action="/">
+      <div>
+        <label for="userFilter">ユーザー:</label>
+        <select id="userFilter" name="user" multiple="multiple">
+          <option value="">全てのユーザー</option>
+          <% users.forEach(user => { %>
+            <option value="<%= user.id %>" <%= (req.query.user || []).includes(user.id.toString()) ? 'selected' : '' %>><%= user.username %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="flatpickr-wrapper">
+        <label for="dateRange">日付範囲:</label>
+        <input type="text" id="dateRange" name="dateRange" value="<%= req.query.dateRange || '' %>" placeholder="日付範囲を選択" readonly />
+      </div>
+      <button type="submit">フィルター</button>
+    </form>
     <table>
+      
       <thead>
         <tr>
           <th>ユーザー</th>
@@ -139,5 +164,102 @@
         <% }) %>
       </tbody>
     </table>
+    <div class="pagination">
+
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="?page=<%= i %>&limit=<%= limit %>&user=<%= req.query.user %>&dateRange=<%= req.query.dateRange %>" class="pagination-link <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+      <% } %>
+
+    </div>
+    
+    <style>
+      .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+      .pagination-link {
+        margin: 0 5px;
+        padding: 8px 16px;
+        border: 1px solid #e3342f;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #e3342f;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      .pagination-link:hover {
+        background-color: #e3342f;
+        color: white;
+      }
+      .pagination-link.active {
+        font-weight: bold;
+        background-color: #e3342f;
+        color: white;
+      }
+    </style>
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          // Initialize Select2 for the user select dropdown
+          $("#userFilter").select2({
+            placeholder: "ユーザーを選択",
+            allowClear: true,
+          });
+    
+          // Initialize Flatpickr for the date range picker
+          flatpickr("#dateRange", {
+            mode: "range",
+            dateFormat: "Y-m-d",
+           // appendTo: document.querySelector('.flatpickr-wrapper'),
+          //  position: "auto center", // Ensure the calendar is positioned correctly
+            static: true, // Make the calendar appear inline with the input field
+
+          });
+    
+          // Handle form submission to ensure multiple select values are properly formatted
+          $('#filterForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const userFilter = $('#userFilter').val();
+            const dateRange = $('#dateRange').val();
+            const queryParams = new URLSearchParams(window.location.search);
+    
+            if (userFilter) {
+              queryParams.set('user', userFilter.join(','));
+            } else {
+              queryParams.delete('user');
+            }
+    
+            if (dateRange) {
+              queryParams.set('dateRange', dateRange);
+            } else {
+              queryParams.delete('dateRange');
+            }
+    
+            queryParams.set('page', 1); // Reset to page 1
+    
+            window.location.search = queryParams.toString();
+          });
+    
+          // Preserve scroll position on pagination link clicks
+          $('.pagination-link').on('click', function(e) {
+            e.preventDefault();
+            const url = new URL($(this).attr('href'), window.location.origin);
+            const queryParams = new URLSearchParams(url.search);
+    
+            queryParams.set('scroll', window.scrollY);
+    
+            window.location.href = `${url.pathname}?${queryParams.toString()}`;
+          });
+    
+          // Scroll to the previous position if available
+          const scrollPosition = new URLSearchParams(window.location.search).get('scroll');
+          if (scrollPosition) {
+            window.scrollTo(0, parseInt(scrollPosition));
+          }
+        });
+      </script>
   </body>
   </html>

@@ -72,24 +72,40 @@ app.get('/logout', function (req, res, next) {
 
 app.get('/', async (req, res) => {
   const isLoggedIn = req.session?.isAdmin || false;
-  const records = await db.getAllRecords();
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const userFilter = req.query.user ? req.query.user.split(',') : null;
+  const dateRange = req.query.dateRange || null;
   const error = req.query.error || null;
-  db.getAllUsers()  
-    .then(users => {
-      db.getAllRecords()  
-        .then(records => {
-          console.log('Fetched records:', records);
-          res.render('index', { users: users, records: records, isLoggedIn });
-        })
-        .catch(err => {
-          console.error('Error fetching records:', err);
-          res.render('index', { error: 'KPI records could not be fetched.' });
-        });
-    })
-    .catch(err => {
-      console.error('Error fetching users:', err);
-      res.render('index', { error: 'Users could not be fetched.' });
+
+  let startDate = null;
+  let endDate = null;
+  if (dateRange) {
+    const dates = dateRange.split(' to ');
+    startDate = dates[0];
+    endDate = dates[1] || dates[0];
+  }
+
+  try {
+    const users = await db.getAllUsers();
+    const totalRecords = await db.getTotalRecordsCount(userFilter, startDate, endDate);
+    const totalPages = Math.ceil(totalRecords / limit);
+    const records = await db.getPaginatedRecords(page, limit, userFilter, startDate, endDate);
+
+    res.render('index', {
+      users,
+      records,
+      isLoggedIn,
+      currentPage: page,
+      totalPages,
+      limit,
+      error,
+      req
     });
+  } catch (err) {
+    console.error('Error fetching data:', err);
+    res.render('index', { error: 'Data could not be fetched.' });
+  }
 });
 
 // Route to add a KPI record

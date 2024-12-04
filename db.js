@@ -247,6 +247,62 @@ async function getFilteredRecords(userIds, startDate, endDate) {
 }
 
 
+const getPaginatedRecords = (page, limit, userFilter, startDate, endDate) => {
+  return new Promise((resolve, reject) => {
+    const offset = (page - 1) * limit;
+    let query = `
+      SELECT kpi.*, users.username
+      FROM kpi
+      JOIN users ON kpi.user = users.id
+      WHERE 1=1
+    `;
+    const params = [];
 
+    if (userFilter && userFilter.length > 0) {
+      query += ` AND kpi.user IN (${userFilter.map(() => '?').join(',')})`;
+      params.push(...userFilter);
+    }
 
-module.exports = {getFilteredRecords, getRecordById, updateRecord, getUserKpiRecordsDaily, getUserKpiRecords, getKpiGoals, getAllRecords, addRecord, getRecordByUserAndDate, deleteRecord, addUser, getAllUsers, deleteUser, updateKpiGoals };
+    if (startDate && endDate) {
+      query += ` AND kpi.date BETWEEN ? AND ?`;
+      params.push(startDate, endDate);
+    }
+
+    query += ` LIMIT ? OFFSET ?`;
+    params.push(limit, offset);
+
+    db.all(query, params, (err, rows) => {
+      if (err) reject(err);
+      resolve(rows);
+    });
+  });
+};
+
+const getTotalRecordsCount = (userFilter, startDate, endDate) => {
+  return new Promise((resolve, reject) => {
+    let query = `SELECT COUNT(*) as count FROM kpi WHERE 1=1`;
+    const params = [];
+
+    if (userFilter && userFilter.length > 0) {
+      query += ` AND user IN (${userFilter.map(() => '?').join(',')})`;
+      params.push(...userFilter);
+    }
+
+    if (startDate && endDate) {
+      query += ` AND date BETWEEN ? AND ?`;
+      params.push(startDate, endDate);
+    }
+
+    db.get(query, params, (err, row) => {
+      if (err) reject(err);
+      resolve(row.count);
+    });
+  });
+};
+
+module.exports = {
+  getPaginatedRecords,
+  getTotalRecordsCount
+};
+
+module.exports = {  getPaginatedRecords, getTotalRecordsCount, getFilteredRecords, getRecordById, updateRecord, getUserKpiRecordsDaily, getUserKpiRecords, getKpiGoals, getAllRecords, addRecord, getRecordByUserAndDate, deleteRecord, addUser, getAllUsers, deleteUser, updateKpiGoals };
